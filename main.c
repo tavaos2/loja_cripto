@@ -89,3 +89,45 @@ int main() {
 
     return 0;
 }
+
+void consultar_saldo(int idx) {
+    printf("Saldo atual: R$ %.2f\n", usuarios[idx].saldo);
+    printf("Saldo em Bitcoin (BTC): %.2f BTC\n", usuarios[idx].BTC);
+    printf("Saldo em Ethereum (ETH): %.2f ETH\n", usuarios[idx].ETH);
+    printf("Saldo em Ripple (XRP): %.2f XRP\n", usuarios[idx].XRP);
+}
+
+void consultar_extrato(int idx) {
+    printf("Extrato:\n");
+    for (int i = 0; i < usuarios[idx].num_transacoes; i++) {
+        printf("%s\n", usuarios[idx].transacoes[i]);
+    }
+}
+
+
+void depositar(int idx, double valor) {
+    time_t agora = time(NULL);
+    usuarios[idx].saldo += valor;
+
+    char transacao[100];
+    snprintf(transacao, 100, "Depósito de R$ %.2f em %s", valor, ctime(&agora));
+    strcpy(usuarios[idx].transacoes[usuarios[idx].num_transacoes++], transacao);
+
+    printf("Depósito realizado com sucesso.\n");
+}
+
+int sacar(int idx, double valor) {
+    if (usuarios[idx].saldo >= valor) {
+        time_t agora = time(NULL);
+        usuarios[idx].saldo -= valor;
+
+        char transacao[100];
+        snprintf(transacao, 100, "Saque de R$ %.2f em %s", valor, ctime(&agora));
+        strcpy(usuarios[idx].transacoes[usuarios[idx].num_transacoes++], transacao);
+
+        printf("Saque realizado com sucesso.\n");
+        return 1;
+    }
+    printf("Saldo insuficiente.\n");
+    return 0;
+}
