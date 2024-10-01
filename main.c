@@ -9,6 +9,11 @@
 #define MAX_TRANSACAO_LEN 100
 #define ARQUIVO "usuarios.bin"
 
+// Cotações fixas
+#define COTACAO_BTC 1000.0
+#define COTACAO_ETH 500.0
+#define COTACAO_XRP 100.0
+
 typedef struct {
     char cpf[MAX_CPF];
     char senha[MAX_SENHA];
@@ -34,7 +39,6 @@ void cadastrarUsuario() {
     printf("Digite a senha: ");
     scanf("%s", usuario.senha);
 
-    // Inicializando saldo e criptomoedas a zero
     usuario.saldo = 0.0;
     usuario.BTC = 0.0;
     usuario.ETH = 0.0;
@@ -118,6 +122,62 @@ int sacar(Usuario *usuario, double valor) {
     return 0;
 }
 
+
+int verificarSenha(Usuario *usuario) {
+    char senha[MAX_SENHA];
+    printf("Digite sua senha para confirmar: ");
+    scanf("%s", senha);
+    if (strcmp(usuario->senha, senha) == 0) {
+        return 1; 
+    } else {
+        printf("Senha incorreta!\n");
+        return 0; 
+    }
+}
+
+
+void comprarCriptomoeda(Usuario *usuario, const char *moeda, double quantidade) {
+    if (!verificarSenha(usuario)) {
+        printf("Compra cancelada.\n");
+        return;
+    }
+
+    double cotacao = 0.0;
+    if (strcmp(moeda, "BTC") == 0) {
+        cotacao = COTACAO_BTC;
+    } else if (strcmp(moeda, "ETH") == 0) {
+        cotacao = COTACAO_ETH;
+    } else if (strcmp(moeda, "XRP") == 0) {
+        cotacao = COTACAO_XRP;
+    } else {
+        printf("Criptomoeda inválida.\n");
+        return;
+    }
+
+    double valorCompra = quantidade * cotacao;
+
+    if (usuario->saldo >= valorCompra) {
+        usuario->saldo -= valorCompra;
+
+        if (strcmp(moeda, "BTC") == 0) {
+            usuario->BTC += quantidade;
+        } else if (strcmp(moeda, "ETH") == 0) {
+            usuario->ETH += quantidade;
+        } else if (strcmp(moeda, "XRP") == 0) {
+            usuario->XRP += quantidade;
+        }
+
+        time_t agora = time(NULL);
+        char transacao[MAX_TRANSACAO_LEN];
+        snprintf(transacao, MAX_TRANSACAO_LEN, "Compra de %.2f %s por R$ %.2f em %s", quantidade, moeda, valorCompra, ctime(&agora));
+        strcpy(usuario->transacoes[usuario->num_transacoes++], transacao);
+
+        printf("Compra de %.2f %s realizada com sucesso.\n", quantidade, moeda);
+    } else {
+        printf("Saldo insuficiente para a compra.\n");
+    }
+}
+
 void salvarUsuarios(Usuario *usuarios, int numUsuarios) {
     FILE *file = fopen(ARQUIVO, "wb");
     if (file == NULL) {
@@ -131,7 +191,7 @@ void salvarUsuarios(Usuario *usuarios, int numUsuarios) {
 int carregarUsuarios(Usuario *usuarios) {
     FILE *file = fopen(ARQUIVO, "rb");
     if (file == NULL) {
-        return 0; // Nenhum usuário encontrado
+        return 0; 
     }
     int numUsuarios = 0;
     while (fread(&usuarios[numUsuarios], sizeof(Usuario), 1, file)) {
@@ -155,14 +215,15 @@ int main() {
         printf("4. Consultar Extrato\n");
         printf("5. Depositar\n");
         printf("6. Sacar\n");
-        printf("7. Sair\n");
+        printf("7. Comprar Criptomoeda\n");
+        printf("8. Sair\n");
         printf("Escolha uma opção: ");
         scanf("%d", &opcao);
 
         switch (opcao) {
             case 1:
                 cadastrarUsuario();
-                numUsuarios = carregarUsuarios(usuarios); // Atualiza os usuários
+                numUsuarios = carregarUsuarios(usuarios); 
                 break;
             case 2:
                 idxUsuarioLogado = loginUsuario();
@@ -203,12 +264,26 @@ int main() {
                 }
                 break;
             case 7:
+                if (idxUsuarioLogado != -1) {
+                    char moeda[4];
+                    double quantidade;
+                    printf("Digite a criptomoeda (BTC, ETH, XRP): ");
+                    scanf("%s", moeda);
+                    printf("Digite a quantidade a comprar: ");
+                    scanf("%lf", &quantidade);
+                    comprarCriptomoeda(&usuarios[idxUsuarioLogado], moeda, quantidade);
+                    salvarUsuarios(usuarios, numUsuarios);
+                } else {
+                    printf("Faça login primeiro.\n");
+                }
+                break;
+            case 8:
                 printf("Saindo...\n");
                 break;
             default:
                 printf("Opção inválida. Tente novamente.\n");
         }
-    } while (opcao != 7);
+    } while (opcao != 8);
 
     return 0;
 }
