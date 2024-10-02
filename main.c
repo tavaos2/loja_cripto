@@ -128,7 +128,7 @@ int verificarSenha(Usuario *usuario) {
     printf("Digite sua senha para confirmar: ");
     scanf("%s", senha);
     if (strcmp(usuario->senha, senha) == 0) {
-        return 1; 
+        return 1;
     } else {
         printf("Senha incorreta!\n");
         return 0; 
@@ -178,6 +178,51 @@ void comprarCriptomoeda(Usuario *usuario, const char *moeda, double quantidade) 
     }
 }
 
+
+void venderCriptomoeda(Usuario *usuario, const char *moeda, double quantidade) {
+    if (!verificarSenha(usuario)) {
+        printf("Venda cancelada.\n");
+        return;
+    }
+
+    double cotacao = 0.0;
+    if (strcmp(moeda, "BTC") == 0) {
+        if (usuario->BTC < quantidade) {
+            printf("Saldo insuficiente de BTC.\n");
+            return;
+        }
+        cotacao = COTACAO_BTC;
+        usuario->BTC -= quantidade;
+    } else if (strcmp(moeda, "ETH") == 0) {
+        if (usuario->ETH < quantidade) {
+            printf("Saldo insuficiente de ETH.\n");
+            return;
+        }
+        cotacao = COTACAO_ETH;
+        usuario->ETH -= quantidade;
+    } else if (strcmp(moeda, "XRP") == 0) {
+        if (usuario->XRP < quantidade) {
+            printf("Saldo insuficiente de XRP.\n");
+            return;
+        }
+        cotacao = COTACAO_XRP;
+        usuario->XRP -= quantidade;
+    } else {
+        printf("Criptomoeda inválida.\n");
+        return;
+    }
+
+    double valorVenda = quantidade * cotacao;
+    usuario->saldo += valorVenda;
+
+    time_t agora = time(NULL);
+    char transacao[MAX_TRANSACAO_LEN];
+    snprintf(transacao, MAX_TRANSACAO_LEN, "Venda de %.2f %s por R$ %.2f em %s", quantidade, moeda, valorVenda, ctime(&agora));
+    strcpy(usuario->transacoes[usuario->num_transacoes++], transacao);
+
+    printf("Venda de %.2f %s realizada com sucesso.\n", quantidade, moeda);
+}
+
 void salvarUsuarios(Usuario *usuarios, int numUsuarios) {
     FILE *file = fopen(ARQUIVO, "wb");
     if (file == NULL) {
@@ -216,7 +261,8 @@ int main() {
         printf("5. Depositar\n");
         printf("6. Sacar\n");
         printf("7. Comprar Criptomoeda\n");
-        printf("8. Sair\n");
+        printf("8. Vender Criptomoeda\n");
+        printf("9. Sair\n");
         printf("Escolha uma opção: ");
         scanf("%d", &opcao);
 
@@ -278,12 +324,26 @@ int main() {
                 }
                 break;
             case 8:
+                if (idxUsuarioLogado != -1) {
+                    char moeda[4];
+                    double quantidade;
+                    printf("Digite a criptomoeda (BTC, ETH, XRP): ");
+                    scanf("%s", moeda);
+                    printf("Digite a quantidade a vender: ");
+                    scanf("%lf", &quantidade);
+                    venderCriptomoeda(&usuarios[idxUsuarioLogado], moeda, quantidade);
+                    salvarUsuarios(usuarios, numUsuarios);
+                } else {
+                    printf("Faça login primeiro.\n");
+                }
+                break;
+            case 9:
                 printf("Saindo...\n");
                 break;
             default:
-                printf("Opção inválida. Tente novamente.\n");
+                printf("Opção inválida.\n");
         }
-    } while (opcao != 8);
+    } while (opcao != 9);
 
     return 0;
 }
