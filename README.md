@@ -61,3 +61,6 @@ Selecione a opção 6 para sacar uma quantia em reais.
 Sair:
 
 Selecione a opção 9 para encerrar o programa.
+
+ALUNOS:
+GUSTAVO SOUZA ROLIM CAVALCANTE 24.124.030-8 E Thiago Montoia Israel 24.124.013-4
