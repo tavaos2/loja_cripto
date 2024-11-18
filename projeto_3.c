@@ -222,3 +222,17 @@ void menuAdministrador() {
         }
     } while (opcao != 7);
 }
+int main() {
+    char cpf[MAX_CPF], senha[MAX_SENHA];
+
+    printf("Login Administrador\n");
+    printf("CPF: ");
+    scanf("%s", cpf);
+    printf("Senha: ");
+    scanf("%s", senha);
+
+    efetuarLoginAdministrador(cpf, senha);
+    menuAdministrador();
+
+    return 0;
+}
