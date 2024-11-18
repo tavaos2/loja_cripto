@@ -148,3 +148,77 @@ void excluirCriptomoeda() {
     printf("Criptomoeda não encontrada.\n");
     fclose(file);
 }
+void consultarSaldoInvestidor() {
+    char cpf[MAX_CPF];
+    printf("Digite o CPF do investidor: ");
+    scanf("%s", cpf);
+
+    FILE *file = fopen(ARQUIVO_USUARIOS, "rb");
+    if (!file) {
+        perror("Erro ao abrir o arquivo de usuários.");
+        return;
+    }
+
+    Usuario usuario;
+    while (fread(&usuario, sizeof(Usuario), 1, file)) {
+        if (strcmp(usuario.cpf, cpf) == 0 && usuario.ativo) {
+            printf("Saldo do investidor %s (CPF: %s): R$ %.2f\n", usuario.nome, usuario.cpf, usuario.saldo);
+            fclose(file);
+            return;
+        }
+    }
+
+    printf("Investidor não encontrado.\n");
+    fclose(file);
+}
+
+void consultarExtratoInvestidor() {
+    char cpf[MAX_CPF];
+    printf("Digite o CPF do investidor: ");
+    scanf("%s", cpf);
+
+    FILE *file = fopen(ARQUIVO_USUARIOS, "rb");
+    if (!file) {
+        perror("Erro ao abrir o arquivo de usuários.");
+        return;
+    }
+
+    Usuario usuario;
+    while (fread(&usuario, sizeof(Usuario), 1, file)) {
+        if (strcmp(usuario.cpf, cpf) == 0 && usuario.ativo) {
+            printf("Extrato de transações do investidor %s (CPF: %s):\n", usuario.nome, usuario.cpf);
+            fclose(file);
+            return;
+        }
+    }
+
+    printf("Investidor não encontrado.\n");
+    fclose(file);
+}
+
+void menuAdministrador() {
+    int opcao;
+    do {
+        printf("\nMenu Administrador:\n");
+        printf("1. Cadastrar novo investidor\n");
+        printf("2. Excluir investidor\n");
+        printf("3. Cadastrar criptomoeda\n");
+        printf("4. Excluir criptomoeda\n");
+        printf("5. Consultar saldo de investidor\n");
+        printf("6. Consultar extrato de investidor\n");
+        printf("7. Sair\n");
+        printf("Escolha uma opção: ");
+        scanf("%d", &opcao);
+
+        switch (opcao) {
+            case 1: cadastrarInvestidor(); break;
+            case 2: excluirInvestidor(); break;
+            case 3: cadastrarCriptomoeda(); break;
+            case 4: excluirCriptomoeda(); break;
+            case 5: consultarSaldoInvestidor(); break;
+            case 6: consultarExtratoInvestidor(); break;
+            case 7: printf("Saindo...\n"); break;
+            default: printf("Opção inválida.\n");
+        }
+    } while (opcao != 7);
+}
