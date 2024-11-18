@@ -27,3 +27,5 @@ Para executar o programa, use o seguinte comando no terminal:
 ```bash
 ./projeto_3
 ```
+
+ALUNOS: GUSTAVO SOUZA ROLIM CAVALCANTE 24.124.030-8, Thiago Montoia Israel 24.124.013-4 e Dante Ryuichi Kawazu 24.124.008-4
